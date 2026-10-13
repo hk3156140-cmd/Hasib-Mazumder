@@ -1,0 +1,264 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role and custom granular permissions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["OWNER", "MANAGER", "STAFF", "CUSTOMER"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE"] },
+        "permissions": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "role", "status"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category and subcategories",
+      "type": "object",
+      "properties": {
+        "nameEn": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "subcategories": { "type": "array" },
+        "isOnlineVisible": { "type": "boolean" },
+        "orderIndex": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["nameEn", "nameBn"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Inventory product item",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "sku": { "type": "string" },
+        "barcode": { "type": "string" },
+        "qrCode": { "type": "string" },
+        "category": { "type": "string" },
+        "subcategory": { "type": "string" },
+        "description": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "purchasePrice": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "discount": { "type": "number" },
+        "sizes": { "type": "array" },
+        "colors": { "type": "array" },
+        "currentStock": { "type": "integer" },
+        "minimumStock": { "type": "integer" },
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "isArchived": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "sku", "category", "sellingPrice", "currentStock"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "POS showroom sale record",
+      "type": "object",
+      "properties": {
+        "invoiceNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "total": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "dueAmount": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["CASH", "BKASH", "OTHER"] },
+        "staffId": { "type": "string" },
+        "staffName": { "type": "string" },
+        "status": { "type": "string", "enum": ["COMPLETED", "RETURNED", "CANCELLED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["invoiceNumber", "total", "paidAmount", "paymentMethod", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Online customer order",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "deliveryAddress": { "type": "string" },
+        "deliveryArea": { "type": "string" },
+        "deliveryMethod": { "type": "string", "enum": ["STORE_PICKUP", "COURIER"] },
+        "courierName": { "type": "string" },
+        "trackingNumber": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "deliveryCharge": { "type": "number" },
+        "total": { "type": "number" },
+        "paymentStatus": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "orderStatus": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orderNumber", "customerName", "customerPhone", "total", "orderStatus"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer ledger profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "totalPurchases": { "type": "number" },
+        "totalPaid": { "type": "number" },
+        "totalDue": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone"]
+    },
+    "Supplier": {
+      "title": "Supplier",
+      "description": "Supplier information and due record",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "totalPurchase": { "type": "number" },
+        "totalPaid": { "type": "number" },
+        "totalDue": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Business expense entry",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "description": { "type": "string" },
+        "receiptUrl": { "type": "string" },
+        "addedById": { "type": "string" },
+        "addedByName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "category", "amount"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable security and activity audit entry",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "actorId": { "type": "string" },
+        "actorName": { "type": "string" },
+        "actorEmail": { "type": "string" },
+        "targetId": { "type": "string" },
+        "targetType": { "type": "string" },
+        "details": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["action", "actorId", "actorName", "details"]
+    },
+    "BusinessSettings": {
+      "title": "BusinessSettings",
+      "description": "Store information and delivery settings",
+      "type": "object",
+      "properties": {
+        "businessName": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "currency": { "type": "string" },
+        "insideDhakaDeliveryCharge": { "type": "number" },
+        "outsideDhakaDeliveryCharge": { "type": "number" },
+        "storePickupAvailable": { "type": "boolean" },
+        "bkashNumber": { "type": "string" },
+        "cashOnDeliveryEnabled": { "type": "boolean" }
+      },
+      "required": ["businessName", "currency"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial accounting transaction record for sales, customer due payments, supplier payments, expenses, and refunds",
+      "type": "object",
+      "properties": {
+        "transactionNumber": { "type": "string" },
+        "type": { "type": "string", "enum": ["SALE", "CUSTOMER_DUE_PAYMENT", "SUPPLIER_PAYMENT", "EXPENSE", "REFUND", "CAPITAL_INJECTION", "WITHDRAWAL"] },
+        "referenceType": { "type": "string" },
+        "referenceId": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["CASH", "BKASH", "BANK_TRANSFER", "CARD", "OTHER"] },
+        "trxId": { "type": "string" },
+        "payerId": { "type": "string" },
+        "payerName": { "type": "string" },
+        "payeeId": { "type": "string" },
+        "payeeName": { "type": "string" },
+        "staffId": { "type": "string" },
+        "staffName": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["COMPLETED", "PENDING", "FAILED", "VOID"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["transactionNumber", "type", "amount", "paymentMethod", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles and custom staff permissions"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Showroom and online categories"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Clothing inventory and stock records"
+    },
+    "/sales/{saleId}": {
+      "schema": { "$ref": "#/entities/Sale" },
+      "description": "Showroom POS sales and invoices"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Online orders and courier tracking"
+    },
+    "/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Financial accounting transactions and payments"
+    },
+    "/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/Customer" },
+      "description": "Customer dues and purchase history"
+    },
+    "/suppliers/{supplierId}": {
+      "schema": { "$ref": "#/entities/Supplier" },
+      "description": "Suppliers and payable dues"
+    },
+    "/expenses/{expenseId}": {
+      "schema": { "$ref": "#/entities/Expense" },
+      "description": "Showroom operating expenses"
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Activity and permission modification logs"
+    },
+    "/business_settings/{settingId}": {
+      "schema": { "$ref": "#/entities/BusinessSettings" },
+      "description": "Store settings and delivery rates"
+    }
+  }
+}

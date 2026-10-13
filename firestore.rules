@@ -1,0 +1,133 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isOwner() {
+      return isSignedIn() && (
+        ('email' in request.auth.token && request.auth.token.email == 'hk3156140@gmail.com') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'OWNER')
+      );
+    }
+
+    function hasStaffRole() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['OWNER', 'MANAGER', 'STAFF'];
+    }
+
+    function hasPermission(perm) {
+      return isOwner() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions[perm] == true
+      );
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users and Staff Permissions
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isOwner() || hasStaffRole());
+      allow list: if isSignedIn() && (isOwner() || hasStaffRole());
+      allow create: if isSignedIn() && isValidId(userId) && (
+        isOwner() ||
+        (request.auth.uid == userId && (('email' in request.auth.token && request.auth.token.email == 'hk3156140@gmail.com') || incoming().role == 'CUSTOMER'))
+      );
+      allow update: if isSignedIn() && isValidId(userId) && (
+        isOwner() ||
+        (request.auth.uid == userId &&
+         incoming().role == existing().role &&
+         (!('permissions' in incoming()) || incoming().permissions == existing().permissions))
+      );
+      allow delete: if isOwner();
+    }
+
+    // Product Categories
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isOwner() || hasPermission('manageCategories');
+    }
+
+    // Products & Stock
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isOwner() || hasPermission('addProduct');
+      allow update: if isOwner() || hasPermission('editProduct') || hasPermission('manageStock');
+      allow delete: if isOwner() || hasPermission('archiveProduct');
+    }
+
+    // POS Sales
+    match /sales/{saleId} {
+      allow read: if isOwner() || hasPermission('posSales') || hasPermission('viewSalesReports');
+      allow create: if isOwner() || hasPermission('posSales');
+      allow update: if isOwner() || hasPermission('cancelSale') || hasPermission('returnProduct');
+      allow delete: if isOwner();
+    }
+
+    // Online Orders
+    match /orders/{orderId} {
+      allow read: if isOwner() || hasPermission('manageOnlineOrders') || (isSignedIn() && resource.data.customerId == request.auth.uid);
+      allow create: if isOwner() || hasPermission('manageOnlineOrders') || (isSignedIn() && incoming().customerId == request.auth.uid) || (!isSignedIn() && incoming().customerId != null);
+      allow update: if isOwner() || hasPermission('manageOnlineOrders') || (isSignedIn() && resource.data.customerId == request.auth.uid && incoming().orderStatus in ['Cancelled']);
+      allow delete: if isOwner();
+    }
+
+    // Financial Transactions (Ledger & Payments)
+    match /transactions/{transactionId} {
+      allow read: if isOwner() || hasPermission('posSales') || hasPermission('viewSalesReports') || hasPermission('viewProfitReports') || (isSignedIn() && (resource.data.payerId == request.auth.uid || resource.data.payeeId == request.auth.uid));
+      allow create: if isOwner() || hasPermission('posSales') || hasPermission('manageExpenses') || hasPermission('manageCustomers') || (isSignedIn() && incoming().payerId == request.auth.uid);
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read: if isOwner() || hasPermission('manageCustomers') || (isSignedIn() && request.auth.uid == customerId);
+      allow write: if isOwner() || hasPermission('manageCustomers') || (isSignedIn() && request.auth.uid == customerId);
+    }
+
+    // Suppliers
+    match /suppliers/{supplierId} {
+      allow read: if isOwner() || hasPermission('manageSuppliers');
+      allow write: if isOwner() || hasPermission('manageSuppliers');
+    }
+
+    // Expenses
+    match /expenses/{expenseId} {
+      allow read: if isOwner() || hasPermission('manageExpenses') || hasPermission('viewProfitReports');
+      allow write: if isOwner() || hasPermission('manageExpenses');
+    }
+
+    // Audit Logs (Append-Only)
+    match /audit_logs/{logId} {
+      allow read: if isOwner() || hasPermission('viewActivityLogs');
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Business Settings
+    match /business_settings/{settingId} {
+      allow read: if true;
+      allow write: if isOwner() || hasPermission('changeBusinessSettings');
+    }
+  }
+}

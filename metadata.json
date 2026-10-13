@@ -1,0 +1,6 @@
+{
+  "name": "ILAM STORE MANAGER",
+  "description": "Comprehensive luxury clothing showroom & online store management system for ILAM, featuring inventory, multi-role custom permissions, POS, online orders, and accounts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
